@@ -121,6 +121,7 @@ then
    yum -y install nfs-utils
    VGCALC=$(vgs|grep docker-vg|awk '{ print $7 }'|sed -e 's/.[0-9][0-9]g//' -e 's/<//g')
    VGFREESPACE=$(echo $VGCALC - 1|bc)
+   echo $(date) " - Free space on volume: $VGFREESPACE"
    lvcreate -n lv_nfs -L+$VGFREESPACE docker-vg
    mkfs.xfs /dev/mapper/docker--vg-lv_nfs
    echo "/dev/mapper/docker--vg-lv_nfs /exports xfs defaults 0 0" >>/etc/fstab
