@@ -1,6 +1,7 @@
 #!/bin/bash
-# Shell script to deploy OpenShift 3.6 on Microsoft Azure
+# Shell script to deploy OpenShift 3.7 on Microsoft Azure
 # Magnus Glantz, sudo@redhat.com, 2017
+# Modified by Alexander Bezprozvanny
 
 # Assign first argument to be Azure Resource Group
 GROUP=$1
@@ -84,11 +85,11 @@ fi
 echo "Generating deployment configuration."
 cat > azuredeploy.parameters.json << EOF
 {
-        "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+        "\$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
         "contentVersion": "1.0.0.0",
         "parameters": {
                 "_artifactsLocation": {
-                        "value": "https://raw.githubusercontent.com/mglantz/ocp37-azure-simple/master/"
+                        "value": "https://raw.githubusercontent.com/alexbez/ocp37-azure-simple/master/"
                 },
                 "masterVmSize": {
                         "value": "Standard_DS4_v2"
@@ -173,17 +174,7 @@ echo
 echo "Deployment initiated. Allow 40-50 minutes for a deployment to succeed."
 echo "The cluster will be reachable at https://$MASTER_DNS.${LOCATION}.cloudapp.azure.com:8443"
 echo
-echo "Waiting for Bastion host IP to get allocated."
 
-while true; do
-	if azure network public-ip show $GROUP bastionpublicip|grep "IP Address"|cut -d':' -f3|grep [0-9] >/dev/null; then
-		break
-	else
-		sleep 5
-	fi
-done
-
-echo "You can SSH into the cluster by accessing it's bastion host: ssh $(azure network public-ip show $GROUP bastionpublicip|grep "IP Address"|cut -d':' -f3|grep [0-9]|sed 's/ //g')"
 echo "Once your SSH key has been distributed to all nodes, you can then jump passwordless from the bastion host to all nodes."
 echo "To SSH directly to the master, use port 2200: ssh $MASTER_DNS.${LOCATION}.cloudapp.azure.com -p 2200"
 echo "For troubleshooting, check out /var/lib/waagent/custom-script/download/[0-1]/stdout or stderr on the nodes"
